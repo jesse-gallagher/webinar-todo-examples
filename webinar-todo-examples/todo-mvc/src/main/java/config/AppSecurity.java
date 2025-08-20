@@ -15,7 +15,6 @@
  */
 package config;
 
-import jakarta.annotation.security.DeclareRoles;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.security.enterprise.authentication.mechanism.http.OpenIdAuthenticationMechanismDefinition;
 import jakarta.security.enterprise.authentication.mechanism.http.openid.ClaimsDefinition;
@@ -28,13 +27,13 @@ import jakarta.security.enterprise.authentication.mechanism.http.openid.OpenIdPr
   redirectURI="${baseURL}/callback",
   providerURI="${oidc.domain}",
   scope = {"openid", "email", "$DATA" },
-  providerMetadata = @OpenIdProviderMetadata(idTokenSigningAlgorithmsSupported = "ES256"),
-  
+  providerMetadata = @OpenIdProviderMetadata(
+      idTokenSigningAlgorithmsSupported = "ES256"
+  ),
   claimsDefinition = @ClaimsDefinition(
     callerNameClaim = "sub"
   )
 )
-@DeclareRoles("users")
 public class AppSecurity {
 
 }
