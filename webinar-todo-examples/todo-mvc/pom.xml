@@ -58,20 +58,5 @@
 	
   <build>
     <finalName>todo-mvc</finalName>
-    <plugins>
-      <plugin>
-        <groupId>io.openliberty.tools</groupId>
-        <artifactId>liberty-maven-plugin</artifactId>
-        <version>3.11.4</version>
-        <configuration>
-          <runtimeArtifact>
-            <groupId>io.openliberty.beta</groupId>
-            <artifactId>openliberty-runtime</artifactId>
-            <version>25.0.0.9-beta</version>
-            <type>zip</type>
-          </runtimeArtifact>
-        </configuration>
-      </plugin>
-    </plugins>
   </build>
 </project>
