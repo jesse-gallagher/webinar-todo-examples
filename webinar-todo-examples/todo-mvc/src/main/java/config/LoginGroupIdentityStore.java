@@ -15,7 +15,6 @@
  */
 package config;
 
-import java.security.Principal;
 import java.util.Collections;
 import java.util.Set;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -27,13 +26,7 @@ public class LoginGroupIdentityStore implements IdentityStore {
 
   @Override
   public Set<String> getCallerGroups(CredentialValidationResult validationResult) {
-    if(validationResult != null) {
-      Principal principal = validationResult.getCallerPrincipal();
-      if(principal != null && !"anonymous".equalsIgnoreCase(principal.getName())) {
-        return Collections.singleton("users");
-      }
-    }
-    return Collections.emptySet();
+    return Collections.singleton("users");
   }
   
   @Override

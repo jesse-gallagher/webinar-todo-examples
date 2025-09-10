@@ -34,6 +34,4 @@ import jakarta.security.enterprise.authentication.mechanism.http.openid.OpenIdPr
     callerNameClaim = "sub"
   )
 )
-public class AppSecurity {
-
-}
+public class AppSecurity { }

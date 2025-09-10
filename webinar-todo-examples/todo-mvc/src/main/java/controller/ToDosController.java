@@ -16,12 +16,12 @@
 package controller;
 
 import java.time.OffsetDateTime;
-import java.util.stream.Collectors;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.data.Sort;
 import jakarta.inject.Inject;
 import jakarta.mvc.Controller;
 import jakarta.mvc.Models;
+import jakarta.mvc.View;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.FormParam;
@@ -30,7 +30,6 @@ import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import model.ToDo;
@@ -47,15 +46,14 @@ public class ToDosController {
 
 
   @GET
-  @Produces(MediaType.TEXT_HTML)
-  public String get(@QueryParam("status") ToDo.State status) {
+  @View("todos.jsp")
+  public void get(@QueryParam("status") ToDo.State status) {
     if (status == null) {
-      models.put("todos", repository.findAll(Sort.asc("created")).collect(Collectors.toList()));
+      models.put("todos", repository.findAll(Sort.asc("created")).toList());
     } else {
       models.put("todos",
-          repository.findByStatus(status, Sort.asc("created")).collect(Collectors.toList()));
+          repository.findByStatus(status, Sort.asc("created")).toList());
     }
-    return "todos.jsp";
   }
 
   @Path("{documentId}")
