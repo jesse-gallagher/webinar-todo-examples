@@ -33,4 +33,5 @@
   <ssl id="defaultSsl" keyStoreRef="defaultKeyStore" trustStoreRef="defaultTrustStore"></ssl>
   <keyStore id="defaultKeyStore" location="${server.config.dir}/keystore.jks" password="supersecret"></keyStore>
   <keyStore id="defaultTrustStore" location="${server.config.dir}/truststore.jks" password="supersecret"></keyStore>
+  <httpSession invalidateOnUnauthorizedSessionRequestException="true" />
 </server>

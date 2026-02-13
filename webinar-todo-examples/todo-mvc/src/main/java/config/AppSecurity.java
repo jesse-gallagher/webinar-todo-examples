@@ -18,6 +18,7 @@ package config;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.security.enterprise.authentication.mechanism.http.OpenIdAuthenticationMechanismDefinition;
 import jakarta.security.enterprise.authentication.mechanism.http.openid.ClaimsDefinition;
+import jakarta.security.enterprise.authentication.mechanism.http.openid.LogoutDefinition;
 import jakarta.security.enterprise.authentication.mechanism.http.openid.OpenIdProviderMetadata;
 
 @ApplicationScoped
@@ -26,12 +27,18 @@ import jakarta.security.enterprise.authentication.mechanism.http.openid.OpenIdPr
   clientSecret="${oidc.clientSecret}",
   redirectURI="${baseURL}/callback",
   providerURI="${oidc.domain}",
-  scope = {"openid", "email", "$DATA" },
+  scope = { "openid", "email", "$DATA" },
   providerMetadata = @OpenIdProviderMetadata(
       idTokenSigningAlgorithmsSupported = "ES256"
   ),
   claimsDefinition = @ClaimsDefinition(
     callerNameClaim = "sub"
-  )
+  ),
+  tokenAutoRefresh = true,
+  logout = @LogoutDefinition(
+      notifyProvider = true,
+      accessTokenExpiry = true
+  ),
+  redirectToOriginalResource = true
 )
 public class AppSecurity { }
