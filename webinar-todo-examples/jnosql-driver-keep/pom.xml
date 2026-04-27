@@ -68,7 +68,7 @@
 		<dependency>
 			<groupId>org.openntf.xsp</groupId>
 			<artifactId>org.openntf.xsp.jakarta.nosql.driver</artifactId>
-			<version>3.5.0-SNAPSHOT</version>
+			<version>3.6.0</version>
 			<exclusions>
         <exclusion>
           <groupId>org.openntf.xsp</groupId>
@@ -84,7 +84,7 @@
 		<dependency>
 			<groupId>jakarta.nosql</groupId>
 			<artifactId>jakarta.nosql-api</artifactId>
-			<version>1.0.0</version>
+			<version>1.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jnosql.communication</groupId>
