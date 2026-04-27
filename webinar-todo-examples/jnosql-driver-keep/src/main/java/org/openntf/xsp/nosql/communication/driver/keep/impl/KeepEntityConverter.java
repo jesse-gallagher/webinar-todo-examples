@@ -20,8 +20,10 @@ import static java.util.Objects.requireNonNull;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.text.MessageFormat;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -34,13 +36,13 @@ import org.eclipse.jnosql.communication.semistructured.Element;
 import org.eclipse.jnosql.mapping.metadata.EntityMetadata;
 import org.openntf.xsp.jakarta.nosql.communication.driver.DominoConstants;
 import org.openntf.xsp.jakarta.nosql.communication.driver.impl.AbstractEntityConverter;
+import org.openntf.xsp.jakarta.nosql.communication.driver.impl.EntityUtil;
 import org.openntf.xsp.jakarta.nosql.mapping.extension.ItemFlags;
 import org.openntf.xsp.jakarta.nosql.mapping.extension.ItemStorage;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 
 public class KeepEntityConverter extends AbstractEntityConverter {
-
   private final Jsonb jsonb;
 
   public KeepEntityConverter() {
@@ -58,17 +60,30 @@ public class KeepEntityConverter extends AbstractEntityConverter {
           resultDocs.add(Element.of(DominoConstants.FIELD_ID, id));
 
           doc.forEach((key, rawVal) -> {
-            Object value;
-            if(rawVal instanceof Map) {
-              // Assume rich text for now
-              // TODO account for encoding, MIME, etc.
-              value = ((Map<String, String>)rawVal).get("content");
+            if("@meta".equals(key)) {
+              Map<String, Object> val = (Map<String, Object>)rawVal;
+              val.forEach((metaKey, metaVal) -> processMeta(metaKey, metaVal, resultDocs));
+            } else if(key.startsWith("@")) {
+              processMeta(key, rawVal, resultDocs);
+            } else if("$FILES".equals(key)) {
+              // TODO actually process
+              System.out.println("see files " + rawVal);
+              
+              resultDocs.add(Element.of(DominoConstants.FIELD_ATTACHMENTS, Collections.emptyList()));
             } else {
-              List<?> val = rawVal instanceof List ? (List<?>) rawVal : Arrays.asList(rawVal);
-              value = val == null || val.isEmpty() ? null : val.size() == 1 ? val.get(0) : val;
-            }
-            if(value != null) {
-              resultDocs.add(Element.of(key, value));
+              Object value;
+              if(rawVal instanceof Map) {
+                // Assume rich text for now
+                // TODO account for encoding, MIME, etc.
+                // TODO also allow split time/date values
+                value = ((Map<String, String>)rawVal).get("content");
+              } else {
+                List<?> val = rawVal instanceof List ? (List<?>) rawVal : Arrays.asList(rawVal);
+                value = val == null || val.isEmpty() ? null : val.size() == 1 ? val.get(0) : val;
+              }
+              if(value != null) {
+                resultDocs.add(Element.of(key, value));
+              }
             }
           });
 
@@ -79,11 +94,7 @@ public class KeepEntityConverter extends AbstractEntityConverter {
   public Map<String, Object> convertNoSQLEntity(CommunicationEntity entity, boolean inserting,
       EntityMetadata classMapping) {
     requireNonNull(entity, "entity is required"); //$NON-NLS-1$
-    @SuppressWarnings("unchecked")
-    List<ValueWriter<Object, Object>> writers =
-        ValueWriter.getWriters()
-            .map(w -> (ValueWriter<Object, Object>) w)
-            .collect(Collectors.toList());
+    List<ValueWriter<Object, Object>> writers = EntityUtil.getValueWriters();
 
     Map<String, Object> items = entity.elements()
         .stream()
@@ -176,6 +187,21 @@ public class KeepEntityConverter extends AbstractEntityConverter {
       return (String)meta.get("unid");
     } else {
       return null;
+    }
+  }
+  
+  private void processMeta(String key, Object value, List<Element> resultDocs) {
+    switch(String.valueOf(key)) {
+    case "noteid", "@noteid" -> resultDocs.add(Element.of(DominoConstants.FIELD_NOTEID, value));
+    case "lastaccessed", "@lastaccessed" -> resultDocs.add(Element.of(DominoConstants.FIELD_ADATE, OffsetDateTime.parse((String)value)));
+    case "lastmodifiedinfile", "@lastmodifiedinfile" -> resultDocs.add(Element.of(DominoConstants.FIELD_MODIFIED_IN_THIS_FILE, OffsetDateTime.parse((String)value)));
+    case "addedtofile", "@addedtofile" -> resultDocs.add(Element.of(DominoConstants.FIELD_ADDED, OffsetDateTime.parse((String)value)));
+    case "unread", "@unread" -> resultDocs.add(Element.of(DominoConstants.FIELD_READ, !(Boolean)value));
+    case "unid", "@unid" -> resultDocs.add(Element.of(DominoConstants.FIELD_ID, value));
+    case "created", "@created" -> resultDocs.add(Element.of(DominoConstants.FIELD_CDATE, OffsetDateTime.parse((String)value)));
+    case "lastmodified", "@lastmodified" -> resultDocs.add(Element.of(DominoConstants.FIELD_MDATE, OffsetDateTime.parse((String)value)));
+    case "etag", "@etag" -> resultDocs.add(Element.of(DominoConstants.FIELD_ETAG, value));
+    case "size", "@size" -> resultDocs.add(Element.of(DominoConstants.FIELD_SIZE, value));
     }
   }
 }

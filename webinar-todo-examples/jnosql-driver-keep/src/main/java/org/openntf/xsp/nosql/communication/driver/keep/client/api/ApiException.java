@@ -39,7 +39,7 @@ public class ApiException extends RuntimeException {
   }
 
   public ApiException(Response response) {
-    super("Api response has status code " + response.getStatus());
+    super("Api response has status code " + response.getStatus() + ": " + response.readEntity(String.class));
     this.response = response;
   }
 

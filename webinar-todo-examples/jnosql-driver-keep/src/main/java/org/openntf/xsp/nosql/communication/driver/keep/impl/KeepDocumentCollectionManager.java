@@ -15,6 +15,7 @@
  */
 package org.openntf.xsp.nosql.communication.driver.keep.impl;
 
+import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAccessor;
 import java.util.Arrays;
 import java.util.Collection;
@@ -43,6 +44,7 @@ import org.openntf.xsp.jakarta.nosql.communication.driver.impl.EntityUtil;
 import org.openntf.xsp.jakarta.nosql.communication.driver.impl.QueryConverter;
 import org.openntf.xsp.jakarta.nosql.communication.driver.impl.QueryConverter.QueryConverterResult;
 import org.openntf.xsp.jakarta.nosql.communication.driver.impl.ViewInfoImpl;
+import org.openntf.xsp.jakarta.nosql.mapping.extension.AccessRights;
 import org.openntf.xsp.jakarta.nosql.mapping.extension.DominoRepository.CalendarModScope;
 import org.openntf.xsp.jakarta.nosql.mapping.extension.ViewQuery;
 import org.openntf.xsp.nosql.communication.driver.keep.AccessTokenSupplier;
@@ -311,15 +313,14 @@ public class KeepDocumentCollectionManager extends AbstractDominoDocumentCollect
       PageRequest pagination, Sort sorts,
       int maxLevel, boolean docsOnly, ViewQuery viewQuery, boolean singleResult,
       boolean documents) {
-    DataApi dataApi = getDataApi();
 
     EntityMetadata mapping = EntityUtil.getClassMapping(entityName);
-    try {
-      long limit = 0;
-      long skip = 0;
+    try(DataApi dataApi = getDataApi()) {
+      Integer count = null;
+      Integer skip = 0;
       if(pagination != null) {
-        skip = pagination.size() * (pagination.page()-1);
-        limit = pagination.size();
+        skip = (int)(pagination.size() * (pagination.page()-1));
+        count = pagination.size();
 
         if(skip > Integer.MAX_VALUE) {
             throw new UnsupportedOperationException("Domino does not support skipping more than Integer.MAX_VALUE entries");
@@ -346,9 +347,9 @@ public class KeepDocumentCollectionManager extends AbstractDominoDocumentCollect
           (List<Map<String, Object>>) (List<?>) dataApi.fetchViewEntries(
               viewName,
               this.dataSourceSupplier.get(),
-              (int)limit,
+              count,
               docsOnly ? "documents": "all",
-              (int)skip,
+              skip,
               key,
               keyAllowPartial,
               documents,
@@ -410,5 +411,21 @@ public class KeepDocumentCollectionManager extends AbstractDominoDocumentCollect
   @Override
   public String name() {
     return getClass().getName();
+  }
+
+  @Override
+  public AccessRights queryEffectiveAccess() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public CommunicationEntity send(CommunicationEntity entity, boolean attachForm,
+      boolean computeWithForm, boolean save) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public OffsetDateTime queryLastModified() {
+    throw new UnsupportedOperationException();
   }
 }

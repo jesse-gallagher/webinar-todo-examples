@@ -41,6 +41,7 @@ import org.openntf.xsp.nosql.communication.driver.keep.client.model.ListDesignIt
 import org.openntf.xsp.nosql.communication.driver.keep.client.model.QueryRequest;
 import org.openntf.xsp.nosql.communication.driver.keep.client.model.RichTextRepresentation;
 import org.openntf.xsp.nosql.communication.driver.keep.client.model.StatusMessage;
+import jakarta.json.JsonObject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
@@ -54,6 +55,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
 
 /**
  * HCL Domino REST API basis
@@ -380,4 +382,9 @@ public interface DataApi extends AutoCloseable {
   
   @Override
   void close();
+  
+  @GET
+  @Path("/userinfo")
+  @Produces(MediaType.APPLICATION_JSON)
+  public JsonObject getUserInfo();
 }
